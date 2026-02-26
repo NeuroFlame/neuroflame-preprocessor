@@ -22,7 +22,7 @@ Bundled compspec is stored at `specs/vbm-pre.compspec.json`.
 ### Guided mode (recommended)
 
 ```bash
-nfpreprocessor
+./nfpreprocessor
 ```
 
 Guided behavior:
