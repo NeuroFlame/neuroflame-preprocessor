@@ -2,6 +2,9 @@
 
 `nfPreprocessor` runs legacy COINSTAC preprocessing images locally without the old simulator/API flow.
 
+**Latest Release:**  
+[Download the latest version](https://github.com/NeuroFlame/neuroflame-preprocessor/releases/latest)
+
 It is designed for non-developers:
 
 - run with no flags for guided prompts
