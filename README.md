@@ -10,6 +10,7 @@ It is designed for non-developers:
 - stages files into legacy paths (`/input/local0/simulatorRun`)
 - writes output into dated folders under `nfPreOutput/`
 - caches singularity images in `nfPreOutput/images/` when `--singularity` is used
+- defaults to hard-link input staging on Windows (avoids Docker Desktop symlink mount issues)
 
 ## Built-in preprocessor catalog
 
