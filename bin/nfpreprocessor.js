@@ -210,7 +210,7 @@ function printUsage() {
     `  ${flag('--dry-run')}`,
     '      Print merged input payload and exit without Docker run.',
     `  ${flag('--hard-links')}`,
-    '      Use hard links instead of symlink+alternate mount staging.',
+    '      Force hard-link staging (default on Windows for Docker compatibility).',
     `  ${flag('--singularity')}`,
     '      Use singularity/apptainer runtime and cached .sif image.',
     `  ${flag('--help')} ${value('comp')} [${value('<computation-id>')}]`,
@@ -902,6 +902,20 @@ function hasExplicitInputArgs(args) {
   return Boolean(args['pre-run'] || args['covariates-csv'])
 }
 
+function shouldDefaultToHardLinks() {
+  return process.platform === 'win32'
+}
+
+function resolveHardLinkPreference(args) {
+  if (args['hard-links'] === 'true') {
+    return { useHardLinks: true, autoEnabled: false }
+  }
+  if (shouldDefaultToHardLinks()) {
+    return { useHardLinks: true, autoEnabled: true }
+  }
+  return { useHardLinks: false, autoEnabled: false }
+}
+
 function timestampTag() {
   return new Date().toISOString().replace(/[:.]/g, '-')
 }
@@ -1245,7 +1259,16 @@ async function main() {
     await Promise.all([ensureDir(runInputDir), ensureDir(runOutputDir)])
 
     console.log('Preparing input files...')
-    const staging = await stageCovariateFiles(data.input, inputRoot, runInputDir, args['hard-links'] === 'true')
+    const hardLinkPreference = resolveHardLinkPreference(args)
+    if (hardLinkPreference.autoEnabled) {
+      console.log('Windows detected: using hard-link input staging for Docker compatibility.')
+    }
+    const staging = await stageCovariateFiles(
+      data.input,
+      inputRoot,
+      runInputDir,
+      hardLinkPreference.useHardLinks
+    )
     console.log(`Staged ${staging.files.length} covariate file(s).`)
     console.log(`Starting ${useSingularity ? 'singularity' : 'docker'} container ${image}...`)
 
@@ -1401,7 +1424,16 @@ async function main() {
   await Promise.all([ensureDir(runInputDir), ensureDir(runOutputDir)])
 
   console.log('Preparing input files...')
-  const staging = await stageCovariateFiles(data.input, inputRoot, runInputDir, args['hard-links'] === 'true')
+  const hardLinkPreference = resolveHardLinkPreference(args)
+  if (hardLinkPreference.autoEnabled) {
+    console.log('Windows detected: using hard-link input staging for Docker compatibility.')
+  }
+  const staging = await stageCovariateFiles(
+    data.input,
+    inputRoot,
+    runInputDir,
+    hardLinkPreference.useHardLinks
+  )
   console.log(`Staged ${staging.files.length} covariate file(s).`)
   console.log(`Starting ${useSingularity ? 'singularity' : 'docker'} container ${image}...`)
 
